@@ -1,9 +1,12 @@
-FROM php:8.2-fpm-bookworm
+FROM php:8.2-fpm-bullseye
 
+# Instalar dependencias necesarias para compilar extensiones
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip
+    git unzip curl libpq-dev libzip-dev libxml2-dev pkg-config build-essential \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip \
+    && rm -rf /var/lib/apt/lists/*
 
+# Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 WORKDIR /app
