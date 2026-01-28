@@ -22,12 +22,10 @@ RUN composer install --no-dev --optimize-autoloader \
     && php artisan route:cache \
     && php artisan view:cache
 
-# Copiar configuración de Nginx
-COPY ./docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Exponer puerto
 EXPOSE 80
 
 # Comando de inicio: PHP-FPM + Nginx
-CMD service nginx start && php-fpm
+CMD service php-fpm
 
