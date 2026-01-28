@@ -1,4 +1,4 @@
-FROM php:8.2-cli
+FROM php:8.2-fpm-bookworm
 
 RUN apt-get update && apt-get install -y \
     git unzip libpq-dev libzip-dev libxml2-dev \
