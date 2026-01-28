@@ -1,28 +1,41 @@
-FROM php:8.2-cli-bullseye
+# Imagen base con PHP y Apache
+FROM php:8.3-apache
 
-# Instalar dependencias necesarias para extensiones
+# Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
-    git unzip libpq-dev libzip-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip \
-    && rm -rf /var/lib/apt/lists/*
+    git \
+    unzip \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    zip \
+    curl \
+    && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl
+
+# Habilitar mod_rewrite
+RUN a2enmod rewrite
 
 # Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 # Directorio de trabajo
-WORKDIR /app
+WORKDIR /var/www/html
 
 # Copiar proyecto
 COPY . .
 
-# Instalar dependencias de Laravel y cachear config
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan config:cache \
-    && php artisan route:cache \
-    && php artisan view:cache
+# Permisos para Laravel
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
 
-# Exponer puerto
-EXPOSE 8080
+# Instalar dependencias PHP
+RUN composer install --no-dev --optimize-autoloader
 
-# Comando de inicio
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
+# Configuración Apache
+COPY ./docker/apache.conf /etc/apache2/sites-available/000-default.conf
+
+# Puerto para Render
+EXPOSE 80
+
+CMD ["apache2-foreground"]
