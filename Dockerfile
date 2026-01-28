@@ -1,32 +1,18 @@
-FROM php:8.2-fpm-bullseye
+FROM php:8.2-cli
 
-# Instalar dependencias necesarias
 RUN apt-get update && apt-get install -y \
-    git unzip curl libpq-dev libzip-dev libxml2-dev \
-    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip \
-    && rm -rf /var/lib/apt/lists/*
+    git unzip libpq-dev libzip-dev libxml2-dev \
+    && docker-php-ext-install pdo_mysql pdo_pgsql mbstring xml zip
 
-
-
-# Instalar Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Configuración de directorio de trabajo
-WORKDIR /var/www/html
-
-# Copiar archivos del proyecto
+WORKDIR /app
 COPY . .
 
-# Instalar dependencias de Laravel
 RUN composer install --no-dev --optimize-autoloader \
     && php artisan config:cache \
     && php artisan route:cache \
     && php artisan view:cache
 
-
-# Exponer puerto
-EXPOSE 80
-
-# Comando de inicio: PHP-FPM + Nginx
-CMD service php-fpm
-
+EXPOSE 8080
+CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8080"]
