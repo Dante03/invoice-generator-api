@@ -18,10 +18,11 @@ RUN apt-get update && apt-get install -y \
     libfreetype6-dev \
     libjpeg62-turbo-dev \
     libsodium-dev \
+    libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg
 
 # ===============================
-# PHP extensions (FULL)
+# PHP extensions (VALIDAS)
 # ===============================
 RUN docker-php-ext-install \
     pdo \
@@ -34,8 +35,7 @@ RUN docker-php-ext-install \
     bcmath \
     intl \
     gd \
-    sodium \
-    fileinfo
+    sodium
 
 # ===============================
 # Apache
@@ -55,7 +55,7 @@ WORKDIR /var/www/html
 COPY . .
 
 # ===============================
-# Composer install (safe)
+# Composer install
 # ===============================
 RUN composer install \
     --no-dev \
